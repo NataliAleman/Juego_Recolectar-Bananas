@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 🍌 Atrapa las bananas 🍌</title> 
+    <body style="background-image: url(imagenes/Fondo1.jpg); background-repeat: no-repeat; background-size: cover;">
+        <div style="bottom:0; width:100%;">
+          <img id = "personaje" src="imagenes/mono.gif" style ="top: 62%; left: 50%; width:9%; position: fixed; z-index: 1;">
+        </div>
+</head>
+
+
+<script>
+        var inter; //Variable que almacena el intervalo.
+        var teclas = " ";   //Variable que almacena la tecla presionada.
+        var teclaPresionada = false; //Variable que indica si la tecla ya ha sido pulsada.
+        var ancho= window.innerWidth; //Variable que almacena el ancho de la pantalla.
+        var alto = window.innerHeight; //Variable que almacena la altura de la pantalla.
+        var puntos = 0; //Variable que almacena el puntaje, principalmente se inicia en 0.
+        var ganas = 15; //Variable que almacena el objetivo para ganar, principalmente se inicia en 10.
+        var personaje = document.getElementById("personaje"); //Variable que almacena el elemento recoje.
+        var posicion1 = 0; //Variable que almacena la posicion en X del personaje.
+        var posicion2 = 0; //Variable que almacena la posicion en Y del personaje.
+        var velocidad = 50; //Variable que almacena la velocidad del personaje.
+        var velocidadBanana = 10; //Variable que almacena la velocidad de las bananas.
+        var direccion = "derecha"; //Variable que almacena la posicion del mono.
+        
+        Bananas(); //Llamada a la funcion que genera las bananas.
+        //Verifica si las teclas que se oprimieron son las correctas para que el mono se mueva.
+        document.onkeydown = function(numtecla) {         
+            teclas = numtecla.keyCode; //Almacena la tecla presionada.
+            teclaPresionada = true; //Indica que la tecla ya ha sido pulsada.
+            //  Tecla de flecha derecha.
+            if (teclas == 39) {
+            //Mover el mono a la derecha.
+                personaje.style.transform = "scaleX(1)";
+                direccion = "derecha";
+            // Tecla de flecha Izquierda.
+            }else if (teclas == 37) {
+                //Voltear dirección del mono.
+                personaje.style.transform = "scaleX(-1)";
+                direccion = "izquierda";
+            }else{
+                return false;
+            }
+            moverPersonaje();
+        }
+        //Función para tirar bananas en posiciones aleatorias.
+        function caen() {
+            var posicion1 = Math.floor(Math.random() * (ancho - 200)); //Genera un numero aleatorio entre 0 y el ancho de la pantalla menos 200.  
+            var banana = document.createElement("img"); //Crea una imagen.
+            banana.src = "imagenes/banana1.gif"; //Asigna la imagen.
+            banana.style.position = "absolute"; //Asigna la posicion a la imagen.
+            banana.style.borderRadius = "55%"; //Aplica una borde redondo a la imagen.
+            banana.style.width = "80px"; //Ancho de la banana.
+            banana.style.height = "90px"; //Altura de la banana.
+            banana.style.left = posicion1 + "px"; //Posicion en X de la banana.
+            document.body.appendChild(banana); //Agrega la banana al body.
+            mover(banana); //Llama a la funcion que mueve la banana.
+        }
+        //Función que da movimiento al mono.
+        function moverPersonaje() {
+            if (direccion == "derecha") { //Si la posicion es derecha.
+                posicion1 += velocidad; //Aumenta la posicion en X del mono.
+            } else {
+                posicion1 -= velocidad; //Disminuye la posicion en X del mono.
+            }
+            personaje.style.left = posicion1 + "px";
+            limites();
+        }
+        //checa los limites de la pantalla para no salirse
+        function limites() {
+            if (posicion1 > window.innerWidth - personaje.width) {
+                posicion1 = window.innerWidth - personaje.width;
+            } else if (posicion1 < 0) {
+                posicion1 = 0;
+            }
+        }
+        //Función para generar las bananas.
+        function Bananas() {
+            intervalo = setInterval(function() {
+                ganas--;
+                if(ganas >= 0){
+                    caen();
+                }else{
+                    clearInterval(intervalo);
+                }
+            }, 3200); //Genera una banana en ese tiempo.       
+                  
+        }
+        //Función para mover las bananas.
+        function mover(banana) {        
+            var posicion2 = 0;  //Variable que almacena la posicion en Y de la banana.
+            var direccion = "derecha"; //Variable que almacena la posicion de la banana.
+            var intervalo; //Variable que almacena el intervalo.
+            var tecla = ""; //Variable que almacena la tecla presionada.
+            var teclaPresionada = false; //Variable que indica si la tecla ya ha sido pulsada.
+            var limite = window.innerHeight - banana.height; //Variable que almacena el limite de la pantalla.               
+            intervalo = setInterval(function() { //Llama a la funcion que mueve la banana.
+                //Baja la banana.
+                posicion2 += velocidadBanana; //Aumenta la posicion en Y de la banana.
+                banana.style.top = posicion2 + "px"; //Asigna la posicion en Y de la banana.
+                //Verificar límite.
+                if (posicion2 > limite) { //Si la posicion en Y de la banana es mayor al limite de la pantalla.
+                    posicion2 = 0; //Reinicia la posicion en Y de la banana.
+                    banana.style.top = posicion2 + "px"; //Asigna la posicion en Y de la banana.
+                } 
+                
+               //Si la banana toca al mono se le sumaran puntos.
+                if (banana.offsetTop + banana.height > personaje.offsetTop && banana.offsetTop < personaje.offsetTop + banana.height && banana.offsetLeft + personaje.width > personaje.offsetLeft && banana.offsetLeft < personaje.offsetLeft + personaje.width) {
+                    document.body.removeChild(banana);
+                    puntos++;
+                    if(puntos == 15){                                
+                        alert("¡Felicidades, ganaste recogiendo todas las bananas!");                      
+                        alert("El mono quedo contento porque se ah comido todas las bananas.");  
+                    }else{ //De lo contrario seguiran cayendo más bananas.
+                        Bananas();
+                        clearInterval(intervalo);
+                    }            
+                }
+            }, 300);          
+
+        }    
+    </script>
+</body>
+</html>
